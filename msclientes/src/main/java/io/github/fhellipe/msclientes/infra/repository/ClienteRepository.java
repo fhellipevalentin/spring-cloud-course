@@ -1,6 +1,6 @@
 package io.github.fhellipe.msclientes.infra.repository;
 
-import io.github.fhellipe.msclientes.model.Cliente;
+import io.github.fhellipe.msclientes.application.model.Cliente;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

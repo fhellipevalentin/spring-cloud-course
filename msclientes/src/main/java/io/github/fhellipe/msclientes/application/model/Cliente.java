@@ -1,4 +1,4 @@
-package io.github.fhellipe.msclientes.model;
+package io.github.fhellipe.msclientes.application.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

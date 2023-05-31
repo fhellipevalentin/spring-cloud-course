@@ -1,6 +1,6 @@
 package io.github.fhellipe.msclientes.application.dto;
 
-import io.github.fhellipe.msclientes.model.Cliente;
+import io.github.fhellipe.msclientes.application.model.Cliente;
 import lombok.Data;
 
 @Data

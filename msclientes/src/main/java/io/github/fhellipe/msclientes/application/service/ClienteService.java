@@ -1,7 +1,7 @@
 package io.github.fhellipe.msclientes.application.service;
 
 import io.github.fhellipe.msclientes.infra.repository.ClienteRepository;
-import io.github.fhellipe.msclientes.model.Cliente;
+import io.github.fhellipe.msclientes.application.model.Cliente;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

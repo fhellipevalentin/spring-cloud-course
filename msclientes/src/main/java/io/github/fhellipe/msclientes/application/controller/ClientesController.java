@@ -2,7 +2,6 @@ package io.github.fhellipe.msclientes.application.controller;
 
 import io.github.fhellipe.msclientes.application.dto.ClienteSaveRequest;
 import io.github.fhellipe.msclientes.application.service.ClienteService;
-import io.github.fhellipe.msclientes.model.Cliente;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
