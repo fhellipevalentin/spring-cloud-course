@@ -1,4 +1,4 @@
-package io.github.fhellipevalentin.msavaliadorcredito.model;
+package io.github.fhellipevalentin.msavaliadorcredito.application.model;
 
 import lombok.Data;
 

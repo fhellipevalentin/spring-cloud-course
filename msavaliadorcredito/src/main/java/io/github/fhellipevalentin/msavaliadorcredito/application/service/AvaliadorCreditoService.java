@@ -1,9 +1,7 @@
 package io.github.fhellipevalentin.msavaliadorcredito.application.service;
 
 import feign.FeignException;
-import io.github.fhellipevalentin.msavaliadorcredito.application.model.CartaoCliente;
-import io.github.fhellipevalentin.msavaliadorcredito.application.model.DadosCliente;
-import io.github.fhellipevalentin.msavaliadorcredito.application.model.SituacaoCliente;
+import io.github.fhellipevalentin.msavaliadorcredito.application.model.*;
 import io.github.fhellipevalentin.msavaliadorcredito.exceptions.DadosClienteNotFoundException;
 import io.github.fhellipevalentin.msavaliadorcredito.exceptions.ErroComunicacaoMicroservicesException;
 import io.github.fhellipevalentin.msavaliadorcredito.infra.clients.CartoesResourceClient;
@@ -13,22 +11,25 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AvaliadorCreditoService {
 
     private final ClienteResourceClient clientesClient;
-    private final CartoesResourceClient cartoesResourceClient;
+    private final CartoesResourceClient cartoesClient;
 
     public SituacaoCliente obterSituacaoCliente (String cpf) throws DadosClienteNotFoundException, ErroComunicacaoMicroservicesException{
         // obterDadosCliente - MSCLIENTES
         // obterCartoesCliente - MSCARTOES
         try {
             ResponseEntity<DadosCliente> dadosClienteResponse = clientesClient.dadosCliente(cpf);
-            ResponseEntity<List<CartaoCliente>> cartoesResponse = cartoesResourceClient.getCartoesByCliente(cpf);
+            ResponseEntity<List<CartaoCliente>> cartoesResponse = cartoesClient.getCartoesByCliente(cpf);
 
             return SituacaoCliente
                     .builder()
@@ -45,5 +46,39 @@ public class AvaliadorCreditoService {
               }
         }
     }
+    public RetornoAvaliacaoCliente realizarAvaliacao(String cpf, Long renda) throws DadosClienteNotFoundException, ErroComunicacaoMicroservicesException{
+        try {
+            ResponseEntity<DadosCliente> dadosClienteResponse = clientesClient.dadosCliente(cpf);
+            ResponseEntity<List<Cartao>> cartaoResponse = cartoesClient.getCartaoRendaUntil(renda);
+
+            List<Cartao> cartoes = cartaoResponse.getBody();
+            var listaCartoesAprovados = cartoes.stream().map( cartao ->  {
+
+                DadosCliente dadosCliente = dadosClienteResponse.getBody();
+
+                BigDecimal limiteBasico = cartao.getLimiteBasico();
+                BigDecimal rendaBD = BigDecimal.valueOf(renda);
+                BigDecimal idadeBD = BigDecimal.valueOf(dadosCliente.getIdade());
+                var fator = idadeBD.divide(BigDecimal.valueOf(10));
+                BigDecimal limiteAprovado = fator.multiply(limiteBasico);
+
+                CartaoAprovado aprovado = new CartaoAprovado();
+                aprovado.setCartao(cartao.getNome());
+                aprovado.setBandeira(cartao.getBandeira());
+                aprovado.setLimiteAprovado(limiteAprovado);
+                return aprovado;
+            }).collect(Collectors.toList());
+            return new RetornoAvaliacaoCliente(listaCartoesAprovados);
+
+        } catch (FeignException.FeignClientException e) {
+            int status = e.status();
+            if (HttpStatus.NOT_FOUND.value() == status) {
+                throw new DadosClienteNotFoundException();
+            } else {
+                throw new ErroComunicacaoMicroservicesException(e.getMessage(), status);
+            }
+        }
+    }
+
 
 }
