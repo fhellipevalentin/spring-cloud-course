@@ -1,11 +1,10 @@
 package io.github.fhellipevalentin.msavaliadorcredito.application.controller;
 
-import io.github.fhellipevalentin.msavaliadorcredito.application.model.RetornoAvaliacaoCliente;
-import io.github.fhellipevalentin.msavaliadorcredito.application.model.SituacaoCliente;
+import io.github.fhellipevalentin.msavaliadorcredito.application.model.*;
 import io.github.fhellipevalentin.msavaliadorcredito.application.service.AvaliadorCreditoService;
 import io.github.fhellipevalentin.msavaliadorcredito.exceptions.DadosClienteNotFoundException;
 import io.github.fhellipevalentin.msavaliadorcredito.exceptions.ErroComunicacaoMicroservicesException;
-import io.github.fhellipevalentin.msavaliadorcredito.application.model.DadosAvaliacao;
+import io.github.fhellipevalentin.msavaliadorcredito.exceptions.ErroSolicitacaoCartaoException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +24,7 @@ public class AvaliadorCreditoController {
 
     // avaliacoes-credito/situacao-cliente?cpf=01234567890
     @GetMapping(value = "situacao-cliente", params = "cpf")
-    public ResponseEntity consultaSituacaoCliente(@RequestParam("cpf") String cpf) {
+    public ResponseEntity consultarSituacaoCliente(@RequestParam("cpf") String cpf) {
         try {
             SituacaoCliente situacaoCliente = avaliadorCreditoService.obterSituacaoCliente(cpf);
             return ResponseEntity.ok(situacaoCliente);
@@ -48,4 +47,14 @@ public class AvaliadorCreditoController {
         }
     }
 
+    @PostMapping("solicitacoes-cartao")
+    public ResponseEntity solicitarCartao(@RequestBody DadosSolicitacaoEmissaoCartao dados){
+        try {
+            ProtocoloSolicitacaoCartao protocoloSolicitacaoCartao = avaliadorCreditoService
+                    .solicitarEmissaoCartao(dados);
+            return ResponseEntity.ok(protocoloSolicitacaoCartao);
+        } catch (ErroSolicitacaoCartaoException e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
 }

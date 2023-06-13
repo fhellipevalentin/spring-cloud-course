@@ -4,17 +4,18 @@ import feign.FeignException;
 import io.github.fhellipevalentin.msavaliadorcredito.application.model.*;
 import io.github.fhellipevalentin.msavaliadorcredito.exceptions.DadosClienteNotFoundException;
 import io.github.fhellipevalentin.msavaliadorcredito.exceptions.ErroComunicacaoMicroservicesException;
+import io.github.fhellipevalentin.msavaliadorcredito.exceptions.ErroSolicitacaoCartaoException;
 import io.github.fhellipevalentin.msavaliadorcredito.infra.clients.CartoesResourceClient;
 import io.github.fhellipevalentin.msavaliadorcredito.infra.clients.ClienteResourceClient;
+import io.github.fhellipevalentin.msavaliadorcredito.infra.mqueue.SolicitacaoEmissaoCartaoPublisher;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +24,7 @@ public class AvaliadorCreditoService {
 
     private final ClienteResourceClient clientesClient;
     private final CartoesResourceClient cartoesClient;
+    private final SolicitacaoEmissaoCartaoPublisher emissaoCartaoPublisher;
 
     public SituacaoCliente obterSituacaoCliente (String cpf) throws DadosClienteNotFoundException, ErroComunicacaoMicroservicesException{
         // obterDadosCliente - MSCLIENTES
@@ -79,5 +81,15 @@ public class AvaliadorCreditoService {
         }
     }
 
+    public ProtocoloSolicitacaoCartao solicitarEmissaoCartao(DadosSolicitacaoEmissaoCartao dados) {
+         try {
+             emissaoCartaoPublisher.solicitarCartao(dados);
+             var protocolo = UUID.randomUUID().toString();
+             return new ProtocoloSolicitacaoCartao(protocolo);
+
+         } catch (Exception e) {
+            throw new ErroSolicitacaoCartaoException(e.getMessage());
+         }
+    }
 
 }
