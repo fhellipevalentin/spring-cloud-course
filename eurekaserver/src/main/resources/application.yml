@@ -1,7 +1,12 @@
 spring:
   application:
     name: eurekaserver
-
+  security:
+    basic:
+      enabled: true
+    user:
+      name: cursoms-eureka-user
+      password: mreursu-keeroua-scs
 server:
   port: 8761
 
