@@ -1,0 +1,16 @@
+########################## COMPILACOES JAVA ###############################
+
+empacotar projeto java (dentro da pasta raiz do projeto): ..... ./mvnw clean package -DskipTests
+fazer build: .................................................. java -jar <caminho>
+
+############################### DOCKER ####################################
+
+criar imagem (na raiz do projeto): ............................ docker build --tag <nome da tag> .
+fazer build: .................................................. docker run --name <nome do container> --network <nome da network> -p <porta>:<porta> <nome da imagem>
+listar containeres: ........................................... docker ps
+listar imagens: ............................................... docker images
+startar/parar container: ...................................... docker container start/stop <nome-container>
+criar network: ................................................ docker network crate <nome>
+criar container keycloak: ..................................... docker run --name cursoms-keycloak -p 8080:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin --network cursoms-network quay.io/keycloak/keycloak:18.0.0 start-dev
+
+logs do container do docker: .................................. docker logs <container>
